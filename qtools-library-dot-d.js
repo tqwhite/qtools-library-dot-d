@@ -9,15 +9,14 @@ const os = require('os');
 const path = require('path');
 const fs = require('fs');
 
-console.log(`HELLO FROM ${__dirname}/${moduleName}`);
 //START OF moduleFunction() ============================================================
 const moduleFunction = ({ moduleName } = {}) => ({ libraryName }) => {
 	// ======================================================================================
 	// SETTERS
-	
+
 	// --------------------------------------------------------------------------------
 	// SET LIBRARY PATH
-	
+
 	let libraryPath;
 
 	const setLibraryPath = (dirPath, callback) => {
@@ -38,19 +37,18 @@ const moduleFunction = ({ moduleName } = {}) => ({ libraryName }) => {
 		require(item.endpointPath)(item.moduleArgs);
 		callback();
 	};
-	
+
 	let add = defaultAdd;
-	
+
 	const setCustomAddFunction = newFunction => (add = newFunction);
-	
-	
+
 	// ======================================================================================
 	// LOG LIST OBJECT
-	
+
 	const logList = (() => {
 		const list = [];
 		const push = item => list.push(item);
-		const toString = () => {
+		const formatList = () => {
 			return list
 				.reduce(
 					(result, item) => `${result}${item}\n\t`,
@@ -58,27 +56,81 @@ const moduleFunction = ({ moduleName } = {}) => ({ libraryName }) => {
 				)
 				.replace(/\n\t$/, '');
 		};
-		return { push, toString };
+		return { push, formatList };
 	})();
-	
-	
+
 	// ======================================================================================
 	// LIBRARY OBJECT
 
+	const libraryObject = {}; //used only for producing display listings
 	const library = (() => {
-		const list = {};
-		const add = (name, item) => (list[name] = item);
-		const toString = () => {
-			return Object.keys(list)
-				.reduce(
-					(result, name) => `${result}${name}: ${(typeof(list[name])).match(/(string|number)/i)?list[name]:typeof(list[name])}\n\t`,
-					`\n${libraryName} Library\n\t`
-				)
-				.replace(/\n\t$/, '');
+		const add = (name, item) => {
+			libraryObject[name] = item; //used only for producing display listings
+			externalElements[name] = item;
 		};
-		return { add, toString };
+		return { add };
 	})();
+
+	// ======================================================================================
+	// LIBRARY OBJECT
+
+	const toString = () => {
 	
+	const formatProperty=item=>{
+		let outString=typeof(item);
+	 if (typeof(item)=='function'){
+	 	const result=item.toString().match(/\((?<args>.*?\))/);
+	 	outString=`(${result.qtGetSurePath('groups.args', 'function')})`
+
+	 }
+	return outString;
+	}
+	
+		return Object.keys(libraryObject)
+			.reduce(
+				(result, name) =>
+					`${result}${name}: ${
+						(typeof libraryObject[name]).match(/(string|number)/i)
+							? libraryObject[name]
+							: formatProperty(libraryObject[name])
+					}\n\t`,
+				`\n${libraryName} Library\n\t`
+			)
+			.replace(/\n\t$/, '');
+	};
+
+	// ======================================================================================
+	// SEAL OBJECT (make immutable)
+
+	const sealActual = externalElements => () => {
+		Object.assign(
+			externalElements.library.qtSelectProperties(['add'], {
+				excludeMode: true
+			})
+		);
+		Object.assign(
+			externalElements.logList.qtSelectProperties(['push'], {
+				excludeMode: true
+			})
+		);
+
+		Object.assign(
+			externalElements.qtSelectProperties(
+				[
+					'setLibraryPath',
+					'loadModules',
+					'seal',
+					'setCustomAddFunction',
+					'library',
+					'logList'
+				],
+				{ excludeMode: true }
+			)
+		);
+		Object.freeze(externalElements);
+		Object.seal(externalElements);
+	};
+
 	// ======================================================================================
 	// LOAD MODULES (actual execution)
 
@@ -153,13 +205,17 @@ const moduleFunction = ({ moduleName } = {}) => ({ libraryName }) => {
 		});
 	};
 
-	return {
+	const externalElements = {
 		setLibraryPath,
 		setCustomAddFunction,
 		logList,
 		library,
-		loadModules
+		loadModules,
+		toString,
+		qtdProcessLog: logList.formatList
 	};
+	externalElements.seal = sealActual(externalElements);
+	return externalElements;
 };
 
 //END OF moduleFunction() ============================================================
