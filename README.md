@@ -26,6 +26,27 @@ expressJS endpoitns.
 
 the dotD object contains three parameters, add....
 
+ASYNCHRONOUS CODE SAMPLE
+
+const promptObjects = require('qtools-library-dot-d')({
+	libraryName: 'promptObjects',
+}, callback);
+promptObjects.setLibraryPath(path.join(__dirname, 'prompts.d'), callback);
+
+const passThroughParameters = {};
+promptObjects.loadModules({ passThroughParameters }, callback);
+promptObjects.seal(); //make the library immutable
 
 
+
+NEW SYNCHROMOUS CODE SAMPLE:
+
+const promptObjects = require('qtools-library-dot-d')({
+	libraryName: 'promptObjects',
+});
+promptObjects.setLibraryPath(path.join(__dirname, 'prompts.d'));
+
+const passThroughParameters = {};
+promptObjects.loadModules({ passThroughParameters });
+promptObjects.seal(); //make the library immutable
 
