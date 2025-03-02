@@ -53,4 +53,4 @@ promptObjects.seal(); //make the library immutable
 
 HISTORY
 
-v1.04 - Tolerant of non-module files and directories in library
+v1.04 - Now tolerates (and reports) directories and files that are not modules.
