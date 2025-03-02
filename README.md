@@ -50,3 +50,7 @@ const passThroughParameters = {};
 promptObjects.loadModules({ passThroughParameters });
 promptObjects.seal(); //make the library immutable
 
+
+HISTORY
+
+v1.04 - Tolerant of non-module files and directories in library

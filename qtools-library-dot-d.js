@@ -40,9 +40,17 @@ const moduleFunction =
 		// SET CUSTOM MODULE ADDING FUNCTION
 
 		const defaultAdd = (item, callback) => {
-			require(item.endpointPath)(item.moduleArgs); //calls module with dotD object, including library.add()
+			let error;
+			try {
+				require(item.endpointPath)(item.moduleArgs); //calls module with dotD object, including library.add()
+			} catch (err) {
+				item.exceptionList.push(
+					`${path.basename(item.endpointPath)}: ${err.toString().split('\n').qtFirst('n/a')}`,
+				);
+			}
+
 			if (typeof callback == 'function') {
-				callback();
+				callback(error);
 			} else {
 				return;
 			}
@@ -73,6 +81,7 @@ const moduleFunction =
 		// LIBRARY OBJECT
 
 		const libraryObject = {}; //used only for producing display listings
+		const exceptionList = [];
 		const library = (() => {
 			const add = (name, item) => {
 				libraryObject[name] = item; //used only for producing display listings
@@ -94,7 +103,7 @@ const moduleFunction =
 				return outString;
 			};
 
-			return Object.keys(libraryObject)
+			const libString = Object.keys(libraryObject)
 				.reduce(
 					(result, name) =>
 						`${result}${name}: ${
@@ -105,6 +114,10 @@ const moduleFunction =
 					`\n${libraryName} Library\n\t`,
 				)
 				.replace(/\n\t$/, '');
+
+			const exceptionString = '\n\t' + exceptionList.join('\n\t');
+
+			return `${libString}${exceptionString}`;
 		};
 
 		// ======================================================================================
@@ -179,9 +192,11 @@ const moduleFunction =
 				//.filter(file => path.extname(file) === '.js')
 				.forEach((file) => {
 					const endpointPath = path.join(libraryPath, file);
+
 					add({
 						endpointPath,
 						moduleArgs,
+						exceptionList,
 					});
 				});
 

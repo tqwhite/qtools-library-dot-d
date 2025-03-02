@@ -1,6 +1,6 @@
 {
   "name": "qtools-library-dot-d",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "Scan a directory for JS modules that can execute and addMe() that attaches it to some form of name/value list, eg, a Map() with functions as values or an xPressJS route/endpoint list.",
   "main": "qtools-library-dot-d.js",
   "scripts": {
